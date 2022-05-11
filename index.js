@@ -40,14 +40,36 @@ async function run() {
 
     //post
 
-    app.post("/inventory",async(req,res)=>{
-            const newIteam = req.body;
-            const result = InventoryCollection.insertOne(newIteam)
-            res.send(result)
+    app.post("/inventory", async (req, res) => {
+      const newIteam = req.body;
+      const result = InventoryCollection.insertOne(newIteam);
+      res.send(result);
+    });
+    //delete
+    app.delete("/inventory/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await InventoryCollection.deleteOne(query);
+      res.send(result);
+    });
 
-
-
-    })
+    app.put("/inventory/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedoc = {
+        $set: {
+          quantity: data.Quentity,
+        },
+      };
+      const result = await InventoryCollection.updateOne(
+        filter,
+        updatedoc,
+        options
+      );
+      res.send(result);
+    });
   } catch {}
 }
 run().catch(console.dir);
