@@ -42,7 +42,7 @@ async function run() {
 
     app.post("/inventory", async (req, res) => {
       const newIteam = req.body;
-      const result = InventoryCollection.insertOne(newIteam);
+      const result = await InventoryCollection.insertOne(newIteam);
       res.send(result);
     });
     //delete
@@ -52,7 +52,31 @@ async function run() {
       const result = await InventoryCollection.deleteOne(query);
       res.send(result);
     });
+    //get
 
+    // app.get("/my-inventory", async (req, res) => {
+    //   const email = req.query.email;
+
+    //   // console.log(email)
+    //   const query = { email };
+    //   const cursor = InventoryCollection.find(query);
+    //   const inventory = await cursor.toArray();
+    //   res.send(inventory);
+    // });
+
+
+    app.get("/my-inventory/:id", async(req,res)=>{
+        const email =req.params.id;
+
+        const query = {userID: email};
+        const iteams= InventoryCollection.find(query);
+        const result = await iteams.toArray();
+        res.send(result);
+
+
+    })
+
+    
     app.put("/inventory/:id", async (req, res) => {
       const id = req.params.id;
       const data = req.body;
