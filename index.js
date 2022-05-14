@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 // const { response } = require("express");
 require("dotenv").config();
@@ -9,6 +11,13 @@ const port = process.env.PORT || 5000;
 //middluare
 app.use(cors());
 app.use(express.json());
+
+// function JwtVerify(req, res, next) {
+
+//   const headerAuth= req.headers.authorization;
+//   // console.log(headerAuth.authorization)
+//   next();
+// }
 
 // user:admin
 //pass:md5i1aVDa9r3eV7J
@@ -23,6 +32,14 @@ async function run() {
   try {
     await client.connect();
     const InventoryCollection = client.db("pharmacy").collection("inventory");
+
+    app.post("/login", async (req, res) => {
+      const user = req.body;
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN, {
+        expiresIn: "1d",
+      });
+      res.send({ accessToken });
+    });
 
     app.get("/inventory", async (req, res) => {
       const query = {};
@@ -64,19 +81,15 @@ async function run() {
     //   res.send(inventory);
     // });
 
+    app.get("/my-inventory/:id", async (req, res) => {
+      const email = req.params.id;
 
-    app.get("/my-inventory/:id", async(req,res)=>{
-        const email =req.params.id;
+      const query = { userID: email };
+      const iteams = InventoryCollection.find(query);
+      const result = await iteams.toArray();
+      res.send(result);
+    });
 
-        const query = {userID: email};
-        const iteams= InventoryCollection.find(query);
-        const result = await iteams.toArray();
-        res.send(result);
-
-
-    })
-
-    
     app.put("/inventory/:id", async (req, res) => {
       const id = req.params.id;
       const data = req.body;
